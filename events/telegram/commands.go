@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"log"
-	"net/url"
 	"strings"
 
 	"read-adviser-bot/lib/e"
@@ -15,16 +14,13 @@ const (
 	RndCmd   = "/rnd"
 	HelpCmd  = "/help"
 	StartCmd = "/start"
+	ToDo     = "/todo"
 )
 
 func (p *Processor) doCmd(ctx context.Context, text string, chatID int, username string) error {
 	text = strings.TrimSpace(text)
 
 	log.Printf("got new command '%s' from '%s", text, username)
-
-	if isAddCmd(text) {
-		return p.savePage(ctx, chatID, text, username)
-	}
 
 	switch text {
 	case RndCmd:
@@ -33,6 +29,8 @@ func (p *Processor) doCmd(ctx context.Context, text string, chatID int, username
 		return p.sendHelp(ctx, chatID)
 	case StartCmd:
 		return p.sendHello(ctx, chatID)
+	case ToDo:
+		return p.savePage(ctx, chatID, text, username)
 	default:
 		return p.tg.SendMessage(ctx, chatID, msgUnknownCommand)
 	}
@@ -89,14 +87,4 @@ func (p *Processor) sendHelp(ctx context.Context, chatID int) error {
 
 func (p *Processor) sendHello(ctx context.Context, chatID int) error {
 	return p.tg.SendMessage(ctx, chatID, msgHello)
-}
-
-func isAddCmd(text string) bool {
-	return isURL(text)
-}
-
-func isURL(text string) bool {
-	u, err := url.Parse(text)
-
-	return err == nil && u.Host != ""
 }
