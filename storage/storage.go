@@ -11,23 +11,23 @@ import (
 )
 
 type Storage interface {
-	Save(ctx context.Context, p *Page) error
-	PickRandom(ctx context.Context, userName string) (*Page, error)
-	Remove(ctx context.Context, p *Page) error
-	IsExists(ctx context.Context, p *Page) (bool, error)
+	Save(ctx context.Context, n *Note) error
+	PickRandom(ctx context.Context, userName string) (*Note, error)
+	Remove(ctx context.Context, n *Note) error
+	IsExists(ctx context.Context, n *Note) (bool, error)
 }
 
 var ErrNoSavedPages = errors.New("no saved pages")
 
-type Page struct {
-	URL      string
+type Note struct {
+	NoteText string
 	UserName string
 }
 
-func (p Page) Hash() (string, error) {
+func (p Note) Hash() (string, error) {
 	h := sha1.New()
 
-	if _, err := io.WriteString(h, p.URL); err != nil {
+	if _, err := io.WriteString(h, p.NoteText); err != nil {
 		return "", e.Wrap("can't calculate hash", err)
 	}
 

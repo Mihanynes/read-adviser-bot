@@ -39,8 +39,8 @@ func (p *Processor) doCmd(ctx context.Context, text string, chatID int, username
 func (p *Processor) savePage(ctx context.Context, chatID int, pageURL string, username string) (err error) {
 	defer func() { err = e.WrapIfErr("can't do command: save page", err) }()
 
-	page := &storage.Page{
-		URL:      pageURL,
+	page := &storage.Note{
+		NoteText: pageURL,
 		UserName: username,
 	}
 
@@ -74,7 +74,7 @@ func (p *Processor) sendRandom(ctx context.Context, chatID int, username string)
 		return p.tg.SendMessage(ctx, chatID, msgNoSavedPages)
 	}
 
-	if err := p.tg.SendMessage(ctx, chatID, page.URL); err != nil {
+	if err := p.tg.SendMessage(ctx, chatID, page.NoteText); err != nil {
 		return err
 	}
 

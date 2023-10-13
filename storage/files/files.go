@@ -20,11 +20,11 @@ type Storage struct {
 
 const defaultPerm = 0774
 
-func New(basePath string) Storage {
-	return Storage{basePath: basePath}
+func New(basePath string) *Storage {
+	return &Storage{basePath: basePath}
 }
 
-func (s Storage) Save(_ context.Context, page *storage.Page) (err error) {
+func (s Storage) Save(_ context.Context, page *storage.Note) (err error) {
 	defer func() { err = e.WrapIfErr("can't save page", err) }()
 
 	fPath := filepath.Join(s.basePath, page.UserName)
@@ -53,7 +53,7 @@ func (s Storage) Save(_ context.Context, page *storage.Page) (err error) {
 	return nil
 }
 
-func (s Storage) PickRandom(_ context.Context, userName string) (page *storage.Page, err error) {
+func (s Storage) PickRandom(_ context.Context, userName string) (page *storage.Note, err error) {
 	defer func() { err = e.WrapIfErr("can't pick random page", err) }()
 
 	path := filepath.Join(s.basePath, userName)
@@ -75,7 +75,7 @@ func (s Storage) PickRandom(_ context.Context, userName string) (page *storage.P
 	return s.decodePage(filepath.Join(path, file.Name()))
 }
 
-func (s Storage) Remove(_ context.Context, p *storage.Page) error {
+func (s Storage) Remove(_ context.Context, p *storage.Note) error {
 	fileName, err := fileName(p)
 	if err != nil {
 		return e.Wrap("can't remove file", err)
@@ -92,7 +92,7 @@ func (s Storage) Remove(_ context.Context, p *storage.Page) error {
 	return nil
 }
 
-func (s Storage) IsExists(_ context.Context, p *storage.Page) (bool, error) {
+func (s Storage) IsExists(_ context.Context, p *storage.Note) (bool, error) {
 	fileName, err := fileName(p)
 	if err != nil {
 		return false, e.Wrap("can't check if file exists", err)
@@ -112,14 +112,14 @@ func (s Storage) IsExists(_ context.Context, p *storage.Page) (bool, error) {
 	return true, nil
 }
 
-func (s Storage) decodePage(filePath string) (*storage.Page, error) {
+func (s Storage) decodePage(filePath string) (*storage.Note, error) {
 	f, err := os.Open(filePath)
 	if err != nil {
 		return nil, e.Wrap("can't decode page", err)
 	}
 	defer func() { _ = f.Close() }()
 
-	var p storage.Page
+	var p storage.Note
 
 	if err := gob.NewDecoder(f).Decode(&p); err != nil {
 		return nil, e.Wrap("can't decode page", err)
@@ -128,6 +128,6 @@ func (s Storage) decodePage(filePath string) (*storage.Page, error) {
 	return &p, nil
 }
 
-func fileName(p *storage.Page) (string, error) {
+func fileName(p *storage.Note) (string, error) {
 	return p.Hash()
 }
